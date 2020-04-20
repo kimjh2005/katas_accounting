@@ -31,11 +31,8 @@ public:
     [[eosio::action]]
     void changecateg(eosio::name user_name, eosio::name from_category, eosio::name to_category, eosio::asset transferable);
 
-    [[eosio::action]]
-    void move(eosio::name from_user, eosio::name to_user, eosio::asset transferable, std::string memo);
-
-    [[eosio::on_notify("accounting::move")]]
-    void onMove(eosio::name from_user, eosio::name to_user, eosio::asset transferable, std::string memo);
+    [[eosio::on_notify("eosio.token::transfer")]]
+    void ontransfer(eosio::name from_user, eosio::name to_user, eosio::asset transferable, std::string memo);
 private:
 
     static eosio::name name_default;
@@ -63,17 +60,14 @@ private:
 
 
     struct [[eosio::table("useraccount"), eosio::contract("accounting")]] useraccount {
-	    uint64_t id;
 	    eosio::name account_name;            // eosio::name of the associated user
 	    std::vector<category> categories;
 
-	    uint64_t primary_key() const { return id; }
-	    uint64_t get_account_name() const { return account_name.value; }
-	    EOSLIB_SERIALIZE(useraccount, (id)(account_name)(categories))
+	    uint64_t primary_key() const { return account_name.value; }
+	    EOSLIB_SERIALIZE(useraccount, (account_name)(categories))
 	};
 
-	typedef eosio::multi_index<"useraccount"_n, useraccount,
-	        eosio::indexed_by<"by.name"_n, eosio::const_mem_fun < useraccount, uint64_t, &useraccount::get_account_name>>> useraccount_table;
+	typedef eosio::multi_index<"useraccount"_n, useraccount> useraccount_table;
 
 
 	int64_t find_category(const useraccount &ua, const eosio::name &category_name) {
