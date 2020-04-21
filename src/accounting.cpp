@@ -15,7 +15,7 @@ void accounting::createuser(name user_name) {
     const auto user_account_itr = useraccounts.find(user_name.value);
     check(user_account_itr == useraccounts.end(), "duplicate useraccount not allowed");
 
-    // user will pay
+    /// user will pay
     useraccounts.emplace(user_name, [&](auto &acct) {
         acct.account_name = user_name;
         acct.categories.emplace_back(static_cast<uint64_t>(acct.categories.size() + 1),
@@ -27,17 +27,16 @@ void accounting::createuser(name user_name) {
 void accounting::createcateg(name user_name, name category_name) {
     require_auth(user_name);
 
-    // check valid useraccount
+    /// check valid useraccount
     useraccount_table useraccounts(get_self(), get_self().value);
     const auto user_account_itr = useraccounts.find(user_name.value);
     check(user_account_itr != useraccounts.end(), "useraccount not found");
 
-    // check human readable category
+    /// check human readable category
     check(accounting::isPrintable(category_name.to_string()), "not human readable category");
 
     symbol sym{"SYS", 4};
     asset empty_asset{0, sym};
-
 
     if (find_category(*user_account_itr, category_name) == invalid_index) {
         useraccounts.modify(user_account_itr, user_name, [&category_name](auto &acct) {
@@ -53,7 +52,7 @@ void accounting::createcateg(name user_name, name category_name) {
 void accounting::printacct(name user_name) {
     require_auth(user_name);
 
-    // check valid useraccount
+    /// check valid useraccount
     useraccount_table useraccounts(get_self(), get_self().value);
     const auto user_account_itr = useraccounts.find(user_name.value);
     check(user_account_itr != useraccounts.end(), "useraccount not found");
@@ -69,7 +68,8 @@ void accounting::printacct(name user_name) {
 
 void accounting::transfercateg(name user_name, name from_category, name to_category, asset transferable) {
     require_auth(user_name);
-    // check valid useraccount
+
+    /// check valid useraccount
     useraccount_table useraccounts(get_self(), get_self().value);
     const auto user_account_itr = useraccounts.find(user_name.value);
     check(user_account_itr != useraccounts.end(), "useraccount not found");
@@ -92,19 +92,12 @@ void accounting::transfercateg(name user_name, name from_category, name to_categ
 
 [[eosio::on_notify("eosio.token::transfer")]]
 void accounting::ontransfer(name from_user, name to_user, asset transferable, string memo) {
-    print_f("*******  accounting::ontransfer % % %", from_user.to_string(), to_user.to_string(), memo);
-    //if (to_user != _self) return;
-    //require_auth(to_user);
-
-    print("^^^^^ pass auth");
-
     useraccount_table useraccounts(get_self(), get_self().value);
 
+    /// update the account which asset is transferred from
     const auto from_user_account_itr = useraccounts.find(from_user.value);
     check(from_user_account_itr != useraccounts.end(), "receiving useraccount not found");
-
     int64_t from_categ_idx = find_category(*from_user_account_itr, name_default);
-
     check(from_user_account_itr->categories[from_categ_idx].balance.amount >= transferable.amount,
           "insufficient amount to change category");
 
@@ -112,19 +105,16 @@ void accounting::ontransfer(name from_user, name to_user, asset transferable, st
         acct.categories[from_categ_idx].balance -= transferable;
     });
 
+    /// update the account which asset is transferred to
     const auto to_user_account_itr = useraccounts.find(to_user.value);
     check(from_user_account_itr != useraccounts.end(), "receiving useraccount not found");
-
     int64_t to_categ_idx = find_category(*to_user_account_itr, name_default);
-
     check(from_user_account_itr->categories[to_categ_idx].balance.amount >= transferable.amount,
           "insufficient amount to change category");
 
     useraccounts.modify(to_user_account_itr, to_user, [&](auto &acct) {
         acct.categories[to_categ_idx].balance += transferable;
     });
-
-    print("ontransfer");
 }
 
 
