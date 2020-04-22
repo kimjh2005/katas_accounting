@@ -5,15 +5,16 @@ project(accounting)
 set(EOSIO_WASM_OLD_BEHAVIOR "Off")
 find_package(eosio.cdt)
 
+include(${EOSIO_CDT_ROOT}/lib/cmake/eosio.cdt/EosioWasmToolchain.cmake)
+
 add_contract( accounting accounting accounting.cpp )
 add_contract( notifyhook notifyhook notifyhook.cpp )
 
-message(STATUS "${PROJECT_SOURCE_DIR}")
+message(STATUS "EOSIO_CDT_ROOT = ${EOSIO_CDT_ROOT}")
 
 target_include_directories( ${PROJECT_NAME} 
 	PUBLIC 
-	${CMAKE_SOURCE_DIR}/../include
-	${accounting_SOURCE_DIR}/../external/eosio.contracts/contracts/eosio.token/include
-	
+	${CMAKE_SOURCE_DIR}/include
+	${CMAKE_BINARY_DIR}/deps/eosio.contracts/contracts/eosio.token/include
 )
 #target_ricardian_directory( accounting ${CMAKE_SOURCE_DIR}/../ricardian )

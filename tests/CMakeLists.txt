@@ -1,0 +1,28 @@
+project(accounting_test)
+
+cmake_minimum_required( VERSION 3.5 )
+
+set( EOSIO_ROOT "$ENV{EOSIO_ROOT}" )
+find_package( eosio )
+string(FIND "${EOSIO_VERSION}" "${EOSIO_DEPENDENCY}" output)
+if (NOT "${output}" EQUAL 0)
+   message(FATAL_ERROR "Incorrect EOSIO version, please use version ${EOSIO_DEPENDENCY}.x")
+else()
+   message(STATUS "EOSIO_ROOT = ${EOSIO_ROOT}")
+endif()
+
+enable_testing()
+
+configure_file( ${CMAKE_SOURCE_DIR}/tests/contracts.hpp.in ${CMAKE_SOURCE_DIR}/tests/contracts.hpp )
+
+file( GLOB UNIT_TESTS_FILES "*.cpp" "*.hpp" )
+
+add_eosio_test( accounting_test ${UNIT_TESTS_FILES} )
+
+target_compile_options( accounting_test PUBLIC -ftemplate-backtrace-limit=0 )
+
+target_include_directories( ${PROJECT_NAME} 
+	PUBLIC 
+	${CMAKE_SOURCE_DIR}/include
+	${CMAKE_BINARY_DIR}/deps/eosio.contracts/contracts/eosio.token/include
+)
