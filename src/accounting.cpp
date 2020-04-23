@@ -93,28 +93,43 @@ void accounting::transfercateg(name user_name, name from_category, name to_categ
 [[eosio::on_notify("eosio.token::transfer")]]
 void accounting::ontransfer(name from_user, name to_user, asset transferable, string memo) {
     useraccount_table useraccounts(get_self(), get_self().value);
+    print("ontransfer ", from_user.to_string()," ", to_user.to_string());
 
     /// update the account which asset is transferred from
     const auto from_user_account_itr = useraccounts.find(from_user.value);
-    check(from_user_account_itr != useraccounts.end(), "receiving useraccount not found");
+    if (from_user_account_itr == useraccounts.end()) {
+    	return;
+    }
+
+    print("*2*");
     int64_t from_categ_idx = find_category(*from_user_account_itr, name_default);
+
+    print(std::to_string(from_categ_idx));
     check(from_user_account_itr->categories[from_categ_idx].balance.amount >= transferable.amount,
           "insufficient amount to change category");
 
+    print("3");
     useraccounts.modify(from_user_account_itr, from_user, [&](auto &acct) {
         acct.categories[from_categ_idx].balance -= transferable;
     });
 
+    print("4");
     /// update the account which asset is transferred to
     const auto to_user_account_itr = useraccounts.find(to_user.value);
-    check(from_user_account_itr != useraccounts.end(), "receiving useraccount not found");
+    if (to_user_account_itr == useraccounts.end()) {
+    	return;
+    }
+
+    print("5");
     int64_t to_categ_idx = find_category(*to_user_account_itr, name_default);
     check(from_user_account_itr->categories[to_categ_idx].balance.amount >= transferable.amount,
           "insufficient amount to change category");
 
+    print("6");
     useraccounts.modify(to_user_account_itr, to_user, [&](auto &acct) {
         acct.categories[to_categ_idx].balance += transferable;
     });
+    print("7");
 }
 
 

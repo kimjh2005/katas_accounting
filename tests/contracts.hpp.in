@@ -12,10 +12,10 @@ struct contracts {
    static std::vector<uint8_t> msig_wasm() { return read_wasm("${CMAKE_BINARY_DIR}/deps_build/eosio.contracts/contracts/eosio.token/eosio.msig.wasm"); }
    static std::vector<char>    msig_abi() { return read_abi("${CMAKE_BINARY_DIR}/deps_build/eosio.contracts/contracts/eosio.token/eosio.msig.abi"); }
 
-   static std::vector<uint8_t> accounting_wasm() { return read_wasm("${CMAKE_BINARY_DIR}/src/accounting.wasm"); }
-   static std::vector<char>    accounting_abi() { return read_abi("${CMAKE_BINARY_DIR}/src/accounting.abi"); }
-   static std::vector<uint8_t> notifyhook_wasm() { return read_wasm("${CMAKE_BINARY_DIR}/src/notifyhook.wasm"); }
-   static std::vector<char>    notifyhook_abi() { return read_abi("${CMAKE_BINARY_DIR}/src/notifyhook.abi"); }
+   static std::vector<uint8_t> accounting_wasm() { return read_wasm("${CMAKE_BINARY_DIR}/accounting/accounting.wasm"); }
+   static std::vector<char>    accounting_abi() { return read_abi("${CMAKE_BINARY_DIR}/accounting/accounting.abi"); }
+   static std::vector<uint8_t> notifyhook_wasm() { return read_wasm("${CMAKE_BINARY_DIR}/notifyhook/notifyhook.wasm"); }
+   static std::vector<char>    notifyhook_abi() { return read_abi("${CMAKE_BINARY_DIR}/notifyhook/notifyhook.abi"); }
 };
 
 }}

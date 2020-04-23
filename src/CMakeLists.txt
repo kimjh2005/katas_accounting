@@ -17,4 +17,16 @@ target_include_directories( ${PROJECT_NAME}
 	${CMAKE_SOURCE_DIR}/include
 	${CMAKE_BINARY_DIR}/deps/eosio.contracts/contracts/eosio.token/include
 )
+
+set_target_properties ( accounting
+    PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/accounting"
+)
+
+
+set_target_properties ( notifyhook
+    PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/notifyhook"
+)
+
 #target_ricardian_directory( accounting ${CMAKE_SOURCE_DIR}/../ricardian )
