@@ -46,12 +46,6 @@ struct accounting_tester: public tester {
         set_code( N(accounting), contracts::accounting_wasm() );
         set_abi( N(accounting), contracts::accounting_abi().data() );
 
-        set_code( N(apple), contracts::accounting_wasm() );
-        set_abi( N(apple), contracts::accounting_abi().data() );
-
-        set_code( N(ibm), contracts::accounting_wasm() );
-        set_abi( N(ibm), contracts::accounting_abi().data() );
-
         set_code( N(apple), contracts::notifyhook_wasm() );
         set_abi( N(apple), contracts::notifyhook_abi().data() );
         set_code( N(ibm), contracts::notifyhook_wasm() );

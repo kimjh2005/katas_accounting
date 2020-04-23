@@ -23,7 +23,6 @@ set_target_properties ( accounting
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/accounting"
 )
 
-
 set_target_properties ( notifyhook
     PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/notifyhook"
