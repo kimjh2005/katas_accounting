@@ -69,6 +69,8 @@ void accounting::printacct(name user_name) {
 void accounting::transfercateg(name user_name, name from_category, name to_category, asset transferable) {
     require_auth(user_name);
 
+    check(transferable.amount > 0, "amount must be positive");
+
     /// check valid useraccount
     useraccount_table useraccounts(get_self(), get_self().value);
     const auto user_account_itr = useraccounts.find(user_name.value);
@@ -94,6 +96,8 @@ void accounting::transfercateg(name user_name, name from_category, name to_categ
 void accounting::ontransfer(name from_user, name to_user, asset transferable, string memo) {
     useraccount_table useraccounts(get_self(), get_self().value);
     print("ontransfer ", from_user.to_string()," ", to_user.to_string());
+
+    check(transferable.amount > 0, "amount must be positive");
 
     /// update the account which asset is transferred from
     const auto from_user_account_itr = useraccounts.find(from_user.value);

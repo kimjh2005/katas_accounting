@@ -115,20 +115,13 @@ struct accounting_tester: public tester {
     void setupAccounts() {
     	BOOST_REQUIRE_NO_THROW( add_acct(N(apple)) );
 
-    	/// duplicate account
-    	BOOST_REQUIRE_THROW( add_acct(N(apple)), transaction_exception );
-		BOOST_CHECK_EQUAL( get_fund_balance(N(apple), CAT_DEFAULT), asset::from_string("2000.0000 SYS"));
-
 		BOOST_REQUIRE_NO_THROW( add_acct(N(ibm)) );
-		BOOST_REQUIRE_THROW( add_acct(N(ibm)), transaction_exception );
 		BOOST_CHECK_EQUAL( get_fund_balance(N(ibm), CAT_DEFAULT), asset::from_string("2000.0000 SYS"));
 
 		BOOST_REQUIRE_NO_THROW( add_cat(N(apple), CAT_PAYROLL) );
-		BOOST_REQUIRE_THROW( add_cat(N(apple), CAT_PAYROLL), transaction_exception);
 		BOOST_REQUIRE_NO_THROW( add_cat(N(apple), CAT_TRAVEL) );
 
 		BOOST_REQUIRE_NO_THROW( add_cat(N(ibm), CAT_PAYROLL) );
-		BOOST_REQUIRE_THROW( add_cat(N(ibm), CAT_PAYROLL), transaction_exception);
 		BOOST_REQUIRE_NO_THROW( add_cat(N(ibm), CAT_TRAVEL) );
     }
 
@@ -143,15 +136,77 @@ struct accounting_tester: public tester {
 };
 
 
+
+BOOST_FIXTURE_TEST_CASE( Invalid_account_test, accounting_tester )try {
+	std::string invalid_name;
+
+	/// empty string
+	BOOST_REQUIRE_THROW( add_acct(eosio::chain::string_to_name(invalid_name)), transaction_exception );
+
+	/// hex number name
+	invalid_name.assign(10, 0xff);
+	BOOST_REQUIRE_THROW( add_acct(eosio::chain::string_to_name(invalid_name)), transaction_exception );
+
+    /// name too long
+	invalid_name.assign("This name is too long!");
+	BOOST_REQUIRE_THROW( add_acct(eosio::chain::string_to_name(invalid_name)), transaction_exception );
+
+    /// no matching eosio.token account
+	invalid_name.assign("fakeapple");
+	BOOST_REQUIRE_THROW( add_acct(eosio::chain::string_to_name(invalid_name)), transaction_exception );
+
+    /// invalid characters
+	invalid_name.assign("a6789");
+	BOOST_REQUIRE_THROW( add_acct(N(invalid_name)), transaction_exception );
+
+	setupAccounts();
+
+	/// duplicate account
+	BOOST_REQUIRE_THROW( add_acct(N(apple)), transaction_exception );
+	BOOST_CHECK_EQUAL( get_fund_balance(N(apple), CAT_DEFAULT), asset::from_string("2000.0000 SYS"));
+
+	std::cout << "end of Invalid_account test" << std::endl;
+
+} FC_LOG_AND_RETHROW()
+
+
+BOOST_FIXTURE_TEST_CASE( Invalid_category_test, accounting_tester )try {
+	std::string invalid_name;
+
+	setupAccounts();
+
+	BOOST_REQUIRE_THROW( add_cat(eosio::chain::string_to_name(invalid_name), CAT_PAYROLL), transaction_exception);
+
+	BOOST_REQUIRE_THROW( add_cat(N(fakeapple), CAT_PAYROLL), transaction_exception);
+
+	/// empty category name
+	BOOST_REQUIRE_THROW( add_cat(N(apple), ""), eosio_assert_message_exception);
+
+	/// empty category name
+	invalid_name.assign(10, 0xff);
+	BOOST_REQUIRE_THROW( add_cat(N(apple), invalid_name), name_type_exception);
+
+	std::cout << "end of invalid category test" << std::endl;
+
+} FC_LOG_AND_RETHROW()
+
+
 BOOST_FIXTURE_TEST_CASE( category_test, accounting_tester )try {
 	setupAccounts();
 
 	/// empty balance
 	BOOST_REQUIRE_THROW( transfer_fund( N(apple), CAT_TRAVEL, CAT_PAYROLL, asset::from_string("1.0000 SYS")), eosio_assert_message_exception );
+
 	/// too much transfer
 	BOOST_REQUIRE_THROW( transfer_fund( N(apple), CAT_DEFAULT, CAT_PAYROLL, asset::from_string("100000.0000 SYS")), eosio_assert_message_exception );
 
-	// working
+	/// zero tranfer
+	BOOST_REQUIRE_THROW( transfer_fund( N(apple), CAT_DEFAULT, CAT_PAYROLL, asset::from_string("0.0000 SYS")), eosio_assert_message_exception );
+
+	/// negative tranfer
+	BOOST_REQUIRE_THROW( transfer_fund( N(apple), CAT_DEFAULT, CAT_PAYROLL, asset::from_string("-100.0000 SYS")), eosio_assert_message_exception );
+
+	/// working
 	BOOST_REQUIRE_NO_THROW( transfer_fund( N(apple), CAT_DEFAULT, CAT_PAYROLL, asset::from_string("1.0000 SYS")) );
 	BOOST_REQUIRE_NO_THROW( transfer_fund( N(apple), CAT_PAYROLL, CAT_TRAVEL, asset::from_string("1.0000 SYS")));
 
@@ -175,9 +230,21 @@ BOOST_FIXTURE_TEST_CASE( transfer_notify_test, accounting_tester )try {
     /// too much asset
     BOOST_REQUIRE_THROW(eosio_transfer(N(apple), N(ibm), asset::from_string("1000000.0000 SYS")), eosio_assert_message_exception);
 
+    /// zero asset
+    BOOST_REQUIRE_THROW(eosio_transfer(N(apple), N(ibm), asset::from_string("0.0000 SYS")), eosio_assert_message_exception);
+
+    /// negative asset
+    BOOST_REQUIRE_THROW(eosio_transfer(N(apple), N(ibm), asset::from_string("-100.0000 SYS")), eosio_assert_message_exception);
+
+    /// working
     BOOST_REQUIRE_NO_THROW(eosio_transfer(N(apple), N(ibm), asset::from_string("100.0000 SYS")));
     BOOST_CHECK_EQUAL( get_fund_balance(N(apple), CAT_DEFAULT), asset::from_string("1900.0000 SYS"));
     BOOST_CHECK_EQUAL( get_fund_balance(N(ibm), CAT_DEFAULT), asset::from_string("2100.0000 SYS"));
+
+    /// working
+    BOOST_REQUIRE_NO_THROW(eosio_transfer(N(ibm), N(apple), asset::from_string("1000.0000 SYS")));
+    BOOST_CHECK_EQUAL( get_fund_balance(N(apple), CAT_DEFAULT), asset::from_string("2900.0000 SYS"));
+    BOOST_CHECK_EQUAL( get_fund_balance(N(ibm), CAT_DEFAULT), asset::from_string("1100.0000 SYS"));
 
 	std::cout << "end of transfer_notify test" << std::endl;
 

@@ -125,6 +125,8 @@ private:
     }
 
     static bool isPrintable(const std::string &value) {
+    	if(value.empty()) return false;
+
         for (auto c : value) {
             if (!std::isprint(c)) return false;
         }
