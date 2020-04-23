@@ -1,12 +1,21 @@
 #include <boost/test/unit_test.hpp>
-#include "eosio.system_tester.hpp"
-#include "contracts.hpp"
+//#include "eosio.system_tester.hpp"
 #include <iostream>
+#include <eosio/testing/tester.hpp>
+#include <eosio/chain/abi_serializer.hpp>
+#include <eosio/chain/resource_limits.hpp>
+#include "contracts.hpp"
+#include "test_symbol.hpp"
+
+
 
 using namespace eosio::chain;
 using namespace eosio::testing;
-using namespace eosio_system;
+//using namespace eosio_system;
 using namespace fc;
+
+using mvo = fc::mutable_variant_object;
+
 
 struct accounting_tester: public tester {
     accounting_tester() {
@@ -48,7 +57,7 @@ struct accounting_tester: public tester {
 
             BOOST_REQUIRE_EQUAL(abi_serializer::to_abi(accnt.abi, abi), true);
 
-            accounting_abi_ser.set_abi(abi, abi_serializer_max_time);
+            accounting_abi_ser.set_abi(abi, abi_serializer::create_yield_function(abi_serializer_max_time));
         }
 
         {
@@ -57,7 +66,7 @@ struct accounting_tester: public tester {
 
             BOOST_REQUIRE_EQUAL(abi_serializer::to_abi(accnt.abi, abi), true);
 
-            acct1_abi_ser.set_abi(abi, abi_serializer_max_time);
+            acct1_abi_ser.set_abi(abi, abi_serializer::create_yield_function(abi_serializer_max_time));
         }
 
         {
@@ -66,7 +75,7 @@ struct accounting_tester: public tester {
 
             BOOST_REQUIRE_EQUAL(abi_serializer::to_abi(accnt.abi, abi), true);
 
-            acct2_abi_ser.set_abi(abi, abi_serializer_max_time);
+            acct2_abi_ser.set_abi(abi, abi_serializer::create_yield_function(abi_serializer_max_time));
         }
 
         {
@@ -75,7 +84,7 @@ struct accounting_tester: public tester {
 
             BOOST_REQUIRE_EQUAL(abi_serializer::to_abi(accnt.abi, abi), true);
 
-            acct3_abi_ser.set_abi(abi, abi_serializer_max_time);
+            acct3_abi_ser.set_abi(abi, abi_serializer::create_yield_function(abi_serializer_max_time));
         }
 
         {
@@ -84,7 +93,7 @@ struct accounting_tester: public tester {
 
             BOOST_REQUIRE_EQUAL(abi_serializer::to_abi(accnt.abi, abi), true);
 
-            tok_abi_ser.set_abi(abi, abi_serializer_max_time);
+            tok_abi_ser.set_abi(abi, abi_serializer::create_yield_function(abi_serializer_max_time));
         }
 
         base_tester::push_action( N(eosio.token), N(create), N(eosio.token), mvo()
@@ -149,7 +158,7 @@ struct accounting_tester: public tester {
         const auto& var =
                 accounting_abi_ser.binary_to_variant("acct",
                                           get_row_by_account(N(accounting), N(accounting), N(account), user_name), // code , scope, table, primary key value
-                                          abi_serializer_max_time);
+                                          abi_serializer::create_yield_function(abi_serializer_max_time));
 //        wdump((var));
         const auto& cat_list = var["cat_list"];
 
@@ -225,6 +234,7 @@ BOOST_FIXTURE_TEST_CASE( on_notify_fail_test, accounting_tester )try {
     // check fund
     BOOST_CHECK_EQUAL( get_fund_balance(N(accnt1), CAT_DEFAULT), SYS_2000_0000);
 } FC_LOG_AND_RETHROW()
+*/
 
 BOOST_FIXTURE_TEST_CASE( create_acct_test, accounting_tester )try {
     BOOST_REQUIRE_NO_THROW( add_acct(N(accnt1)) );
@@ -232,7 +242,7 @@ BOOST_FIXTURE_TEST_CASE( create_acct_test, accounting_tester )try {
     BOOST_CHECK_EQUAL( get_fund_balance(N(accnt1), CAT_DEFAULT), SYS_2000_0000);
 } FC_LOG_AND_RETHROW()
 
-
+/*
 BOOST_FIXTURE_TEST_CASE( create_acct_fail_test, accounting_tester )try {
     // create an invalid account
     BOOST_REQUIRE_THROW( add_acct(N(accntinvalid)), transaction_exception );

@@ -2,6 +2,9 @@ project(accounting_test)
 
 cmake_minimum_required( VERSION 3.5 )
 
+set(CMAKE_BUILD_TYPE Debug)
+message(STATUS "${CMAKE_BUILD_TYPE}")
+
 set( EOSIO_ROOT "$ENV{EOSIO_ROOT}" )
 find_package( eosio )
 string(FIND "${EOSIO_VERSION}" "${EOSIO_DEPENDENCY}" output)
